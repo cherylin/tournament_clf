@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-Mlpy-3.5.0/
+mlpy-3.5.0/
 build/
 develop-eggs/
 dist/
