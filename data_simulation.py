@@ -10,8 +10,10 @@ import numpy as np
 import mlpy
 from sklearn import linear_model, metrics
 from sklearn.model_selection import StratifiedKFold
+from sklearn.svm import LinearSVC
+from numpy import random
 
-def generate_data():
+def generate_data(num_obs, prob, mu, sigma, beta):
     """Generate X, y based on the chosen generationg process, may play around different generation process."""
     # (1) generate Y dim = n*1
     y = np.random.choice(a=[-1, 1], size=(num_obs,1), replace=True, p=[1-prob, prob])
@@ -24,8 +26,8 @@ def generate_data():
 
 def split_data(X, y):
     """Split the given dataset."""
-    # take the first 80% data as the training data
-    skf = StratifiedKFold(n_splits=5)
+    # take 75% data as the training data
+    skf = StratifiedKFold(n_splits=4)
     # only get the first set of indices
     for train_idx, test_idx in skf.split(X, y):
         X_train, X_test = X[train_idx], X[test_idx]
@@ -35,7 +37,7 @@ def split_data(X, y):
 def train_test_lasso(alpha, X_train, y_train, X_test, y_test):
     """Train a lasso model based on given data, and assess its training/test error."""
     # 1: Lasso: (1 / (2 * n_samples)) * ||y - Xw||^2_2 + alpha * ||w||_1
-    clf = linear_model.Lasso(alpha=a)
+    clf = linear_model.Lasso(alpha=alpha)
     clf.fit(X_train, y_train)
     # calculate training accuracy and test accuracy
     y_pred_test = clf.predict(X_test)
@@ -48,8 +50,8 @@ def train_test_lasso(alpha, X_train, y_train, X_test, y_test):
     acc_test = metrics.accuracy_score(y_test, y_pred_test)
     return acc_train, acc_test
 
-def train_test_dlda(d, X_train, y_train, X_test, y_test):
-    clf = mlpy.DLDA(delta=d)
+def train_test_dlda(delta, X_train, y_train, X_test, y_test):
+    clf = mlpy.DLDA(delta=delta)
     y_train = np.transpose(y_train)[0]
     clf.learn(X_train, y_train)
     y_pred_train = clf.pred(X_train)
@@ -58,34 +60,50 @@ def train_test_dlda(d, X_train, y_train, X_test, y_test):
     acc_test = metrics.accuracy_score(y_test, y_pred_test)
     return acc_train, acc_test
 
-def avg_train_test_acc(alpha, delta):
-    """Given a list of classifer model, average their training/test errors on N datasets."""
-    # [0] = acc_train [1] = acc_test
-    avg_train_acc = []
+def train_test_linearsvm(c, X_train, y_train, X_test, y_test):
+    clf = LinearSVC(penalty='l2', loss='squared_hinge', dual=True, tol=1e-4, C=c, class_weight='balanced')
+    y_train = np.transpose(y_train)[0]
+    clf.fit(X_train, y_train)
+    y_pred_train = clf.predict(X_train)
+    y_pred_test = clf.predict(X_test)
+    acc_train = metrics.accuracy_score(y_train, y_pred_train)
+    acc_test = metrics.accuracy_score(y_test, y_pred_test)
+    return acc_train, acc_test
+
+def main():
+    np.random.seed(1)
+    """ tunable parameters """
+    num_obs = 36; # number of observations
+    num_predictors = 200; # number of predictors
+    prob = 0.5 # probability that yi = 1
+    beta = np.random.uniform(0, 1, size=(1, num_predictors))# signal of each predictor
+    # multivariate normal distribution
+    sigma = np.eye(num_predictors) # covariance matrix
+    mu = np.zeros(num_predictors) # ith row for mu
+    # parameters for lasso model
+    a = 0.1 # for regularization
+    # instances of training data
+    N = 200
+    # for dlda
+    d = 0.1
+    # for SVM
+    c = 0.5
+
+    """main for loop"""
     lasso_result = np.zeros((N, 2))
     dlda_result = np.zeros((N, 2))
+    linear_svm_result = np.zeros((N, 2))
     for i in range(0, N):
-        X, y = generate_data() # write the database to file?
+        X, y = generate_data(num_obs, prob, mu, sigma, beta) # write the generated data to file?
         X_train, y_train, X_test, y_test = split_data(X, y)
-        lasso_result[i][0], lasso_result[i][1] = train_test_lasso(alpha, X_train, y_train, X_test, y_test)
-        dlda_result[i][0], dlda_result[i][1] = train_test_dlda(delta, X_train, y_train, X_test, y_test)
-    avg_train_acc.append(np.mean(lasso_result, axis = 0))
-    avg_train_acc.append(np.mean(dlda_result, axis = 0))
-    return avg_train_acc
+        lasso_result[i][0], lasso_result[i][1] = train_test_lasso(a, X_train, y_train, X_test, y_test)
+        dlda_result[i][0], dlda_result[i][1] = train_test_dlda(d, X_train, y_train, X_test, y_test)
+        linear_svm_result[i][0], linear_svm_result[i][1] = train_test_linearsvm(c, X_train, y_train, X_test, y_test)
+    lasso_result = np.mean(lasso_result, axis = 0)
+    dlda_result = np.mean(dlda_result, axis = 0)
+    linear_svm_result = np.mean(linear_svm_result, axis = 0)
+    print("Lasso: train accuracy= {} and test accuracy= {}".format(lasso_result[0], lasso_result[1]))
+    print("DLDA: train accuracy= {} and test accuracy= {}".format(dlda_result[0], dlda_result[1]))
+    print("LinearSVM: train accuracy= {} and test accuracy= {}".format(linear_svm_result[0], linear_svm_result[1]))
 
-
-# can further write it to config.json and loop for different configuration
-# parameters
-num_obs = 25; # number of observations
-num_predictors = 100; # number of predictors
-prob = 0.5 # probability that yi = 1
-beta = np.random.uniform(0, 1, size=(1, num_predictors))# signal of each predictor
-# multivariate normal distribution
-sigma = np.eye(num_predictors) # covariance matrix
-mu = np.zeros(num_predictors) # ith row for mu
-# parameters for lasso model
-a = 0.1 # for regularization
-# instances of data
-N = 100
-# for dlda
-d = 0.1
+main()
