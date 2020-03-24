@@ -3,6 +3,7 @@
 		"num_observations": 30,
 		"num_predictors": 100,
 		"probability": 0.5,
-		"alpha": 0.1
+		"alpha": 0.1,
+		"delta": 0
 	}
 ]

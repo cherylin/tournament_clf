@@ -132,7 +132,6 @@ def tc_it(x,y):
                     pairs[k] = pair[0] + pair[1] + pair[2]
             elif len(pair) == 2:
                 a = interp(adj[:,i],adj[:,i+1],y)
-
                 if itr > 1:
                     a.shape = (n,1)
                 coefs[:,pair[0]] = coefs[:,pair[0]]*a
@@ -180,9 +179,9 @@ def tc_pred(x,y,coefs):
     n = np.shape(x)[0]
     preds = [1 if k > 0 else -1 for k in np.sum(coefs*x,1)]
     acc = np.sum(y == preds)/n
-    return(preds,acc)
+    return preds,acc
 
 def tc(x,y,iters):
     coefs = tc_coefs(x,y,iters)
     preds,acc = tc_pred(x,y,coefs)
-    return(coefs,preds,acc)
+    return coefs,preds,acc
