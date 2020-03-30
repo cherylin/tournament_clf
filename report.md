@@ -15,7 +15,9 @@
 
 8. number of predictors/dimension of the data, p = 200
 
-### Outputs:
+### Outputs: 
+
+#### in folder "outputs/np_ratio"
 
 1. the average training & testing accuracy over 100 datasets for each setting for each model
 2. a plot that describes how training and testing accruacy changes along with n for each of model
@@ -42,6 +44,8 @@
 10. change sparsity first, alpha is one of 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9
 
 ### Outputs:
+
+#### in folder "outputs/cov_impact_correlation"
 
 with normalizing the diagonals to 1's
 
@@ -79,6 +83,8 @@ with normalizing the diagonals to 1's
 
 ### Outputs:
 
+#### in folder "outputs/beta_impact_sparsity"
+
 1. the average training & testing accuracy over 100 datasets for each setting for each model (accuracy_comparison.csv)
 2. a plot that describes how training and testing accruacy changes along with density for each of model
 
@@ -113,6 +119,8 @@ with normalizing the diagonals to 1's
     - HERE WE CHOOSE TO FIX density = 0.2 and control entries being uniformly distributed within  **[0, 2], [0, 3], [0, 4] .. [0, 8]**
 
 ### Outputs:
+
+#### in folder "outputs/beta_impact_weight"
 
 1. the average training & testing accuracy over 100 datasets for each setting for each model for previously described each setting (accuracy_comparison.csv)
 2. a plot that describes how training and testing accruacy changes along with weights of entries for each of model
