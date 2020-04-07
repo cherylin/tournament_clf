@@ -15,6 +15,8 @@ from numpy import random
 np.random.seed(1)
 import math
 import matplotlib.pyplot as plt
+import argparse
+import sys
 
 def generate_data(num_obs, prob, mu, sigma, beta):
     """Generate X, y based on the chosen generationg process, may play around different generation process."""
@@ -26,7 +28,6 @@ def generate_data(num_obs, prob, mu, sigma, beta):
     # multiply yi's and beta and add with U to get X, dimX = n*p
     X = np.dot(y, beta) + U
     return X, y
-
 
 def evaluation(all_n, all_X, all_y, N, p, a, d, c, model='lasso'):
     # sigma = np.diagflat(np.random.uniform(0, 2, size=(1, num_predictors)))
@@ -74,7 +75,7 @@ def evaluation(all_n, all_X, all_y, N, p, a, d, c, model='lasso'):
     return train_acc, test_acc
 
 
-def main():
+def main(args):
     all_n= [20, 40, 50, 80, 100, 200, 300, 400, 500, 600]
     p = 200
     prob = 0.5
@@ -100,6 +101,13 @@ def main():
             all_y.append(y)
         X_in_all_n[n] = all_X
         y_in_all_n[n] = all_y
+    
+    if args.output_content == 'data_generator':
+        np.savetxt('./var/X_data.csv', X_in_all_n[80][0], delimiter=',')
+        np.savetxt('./var/sigma_data.csv', sigma, delimiter=',')
+        np.savetxt('./var/beta_data.csv', beta, delimiter=',')
+        np.savetxt('./var/y_label.csv', y_in_all_n[80][0], delimiter=',')
+        sys.exit()
     models = ['lasso', 'dlda', 'svm', 'tc']
     result = {}
     for m in models:
@@ -123,6 +131,11 @@ def main():
             ]
             fout.write(','.join(map(str, output_list)))
             fout.write('\n')
-        
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='a program that uses svd to compress images', 
+                                     usage='--output_content <data_generator>'
+    )
+    parser.add_argument('--output_content', required=False, action='store', help='data_generator')
+    main(parser.parse_args())
