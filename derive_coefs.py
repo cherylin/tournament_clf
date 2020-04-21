@@ -1,21 +1,11 @@
-from models import *
 import numpy as np
-from sklearn import linear_model, metrics
-from numpy import random
-np.random.seed(1)
 import math
 import matplotlib.pyplot as plt
 from scipy.stats import multivariate_normal
 from scipy.sparse.linalg import lsqr
+import utils
 
-def read_matrix(filename):
-    matrix = []
-    with open(filename, 'r') as fin:
-        rows = fin.read().strip().split('\n')
-        for row in rows:
-            entries = row.split(',')
-            matrix.append(list(map(float, entries)))
-    return np.array(matrix)
+INPUT_DIR = './setting_1/'
 
 def prob_y_given_x(X, y, sigma, beta):
     # Assume p(y=1) and p(y=-1) are 1/2
@@ -30,22 +20,22 @@ def prob_y_given_x(X, y, sigma, beta):
 
 def main():
     # all data are 2-dimensional matrix
-    X = read_matrix('./var/X_data.csv')
-    y = read_matrix('./var/y_label.csv')
-    sigma = read_matrix('./var/sigma_data.csv')
-    beta = read_matrix('./var/beta_data.csv')
+    X = utils.read_matrix(INPUT_DIR+'X_data.csv')
+    y = utils.read_matrix(INPUT_DIR+'y_label.csv')
+    sigma = utils.read_matrix(INPUT_DIR+'sigma_data.csv')
+    beta = utils.read_matrix(INPUT_DIR+'beta_data.csv')
     n, p = X.shape
-    # for each x, compute its probability of P(y|x)
+    # for each x, compute its POSTERIOR probability of P(y|x)
     # y = 1, X ~ MVN(beta, sigma)
     # y = -1, X ~ MVN(-beta, sigma)
     prob_pos, prob_neg = prob_y_given_x(X, y, sigma, beta)
     pred = np.where(prob_pos > 0.5, 1, -1)
     pred = pred[:, np.newaxis]
-    prob_pos = prob_pos[:, np.newaxis]
+    prob_pos = prob_pos[:, np.newaxis] - 0.5
     # approximate the optimal coefficients
     # prob_pos should be the score return by the classifier
-    # extra_col = np.ones(shape=(n, 1))
-    # X = np.append(X, extra_col, axis=1)
+    extra_col = np.ones(shape=(n, 1))
+    X = np.append(X, extra_col, axis=1)
     # solve least square solution for Xw = prob_pos 
     w, *_ = lsqr(X, prob_pos)
     print(w)

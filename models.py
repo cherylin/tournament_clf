@@ -7,7 +7,11 @@ from sklearn import linear_model, metrics
 from sklearn.svm import LinearSVC
 from tc import tc, tc_pred
 
-def lasso(alpha, X_train, y_train, X_test, y_test):
+ALPHA = 0.5
+DELTA = 0.1
+C = 5
+
+def lasso(X_train, y_train, X_test, y_test, alpha=ALPHA):
     """
     Lasso model: (1 / (2 * n_samples)) * ||y - Xw||^2_2 + alpha * ||w||_1
     """
@@ -24,7 +28,7 @@ def lasso(alpha, X_train, y_train, X_test, y_test):
     testing_acc = metrics.accuracy_score(y_test, y_pred_test)
     return training_acc, testing_acc, np.array(clf.coef_)
 
-def dlda(delta, X_train, y_train, X_test, y_test):
+def dlda(X_train, y_train, X_test, y_test, delta=DELTA):
     clf = mlpy.DLDA(delta=delta)
     y_train = np.transpose(y_train)[0]
     clf.learn(X_train, y_train)
@@ -35,8 +39,8 @@ def dlda(delta, X_train, y_train, X_test, y_test):
     testing_acc = metrics.accuracy_score(y_test, y_pred_test)
     return training_acc, testing_acc, np.array(coef)
 
-def linearsvm(c, X_train, y_train, X_test, y_test):
-    clf = LinearSVC(penalty='l2', loss='squared_hinge', dual=True, tol=1e-4, C=c, class_weight='balanced')
+def linearsvm(X_train, y_train, X_test, y_test, c=C):
+    clf = LinearSVC(penalty='l2', loss='hinge', dual=True, tol=1e-4, C=c, class_weight='balanced')
     y_train = np.transpose(y_train)[0]
     clf.fit(X_train, y_train)
     y_pred_train = clf.predict(X_train)
