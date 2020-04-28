@@ -58,12 +58,16 @@ Procedure2: Repeat procedure1 with different parameter settings.
 
 Fix all other parameters as the basic setting (refer to previous section), but try n = [20, 40, 50, 80, 100, 200, 300, 400, 500]
 
-outputs:
+Outputs:
 - in outputs/setting_1/ folder
-- A csv that compares accuracies of four models in each parameter settings
+- accuracy_comparison.csv compares accuracies of four models in each n,p parameter setting
 - 4 csv that record the coefficients of 4 models in each parameter setting
 - 4 plots that describes the trends of accuracy data with respect to change of n
 - sigma_data.csv, X_data.csv, y_label.csv, beta_data.csv that record the data generated at n = 80, these are used for deduce optimal classifier
+
+Observation:
+- Comparing accuracy data, we can see almost all the models works well on separating two classes.
+- At situation when n << p, tournament classifier(tc), dlda and svm works slightly better than the lasso model.
 
 ## Setting 2: Beta-sparsity
 
@@ -73,19 +77,44 @@ To tune the sparsity, use scipy function: scipy.sparse.random(1, p, **density=d*
 
 We try density = [0.01, 0.05, 0.1, 0.2, 0.5, 0.7, 0.9]
 
-outputs: in outputs/setting_2/ folder
+Outputs:
+- in outputs/setting_2/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 csv that record the model coefficients of 4 models in each parameter setting
+- 4 plots that describes the trends of training and testing accuracy data with respect to each density
+- generated_beta_density=m_nth-example.csv record the beta vector generated in every 20th dataset with density m.
+
+Observation:
+- At low density value, the beta vector has higher sparsity, thus the data has less signals. All the models' test accuracy are around 60%
+- As density increases, accuracy generally increases for all models. While, tc, svm and dlda works better than lasso because they reach higher accuracy at the highest density value. But SVM and DLDA has a faster rate of increasing accuracy than TC.
 
 ## Setting 3: Beta-weights
 
 Fix all parameters but beta. This time we fix sparsity, so just use function as in the basic setting: np.random.uniform(a, b, size=(1, p)), but substitute tuple [a, b] to each of [(-1, 1), (-3, 3), (-10, 10), (-0.1, 0.1), (0, 0.01), (-5, 0.001)]
 
-outputs: in outputs/setting_3/ folder
+outputs:
+- in outputs/setting_3/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 files that record the model coefficients of 4 models in each parameter setting
+- generated_beta_range=(a,b)_ith-example.csv record the beta vector generated in every 20th dataset with range=(a,b).
+
+Observation:
+- Comparing accuracy data, it is found that tc surprisingly doesn't work well when the range is (-5, 0.001). It has test accuracy 0.32, comparing to others with test accuracy almost 1. And all models have much lower test accuracy when range=(-0.1, 0.1) and (0, 0.01).
 
 ## Setting 4: Combine setting 2 and setting 3
 
 We try combinations of density in [0.1, 0.9] and (a, b) in [(-0.1, 0.1), (-10, 10), (-5, 0.001)]. So basically 6 combinations
 
-outputs: in outputs/setting_4/ folder
+outputs:
+- in outputs/setting_4/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 txt files that record the model coefficients of 4 models in each parameter setting
+- 4 plots that describes the trends of training and testing accuracy data with respect to each density
+- generated_beta_combination=j_ith-example.csv record the beta vector generated in every 20th dataset with jth combination of parameter setting as specified above.
+
+Observation:
+- With different density value, tc still doesn't work well at range=(-5, 0.001) comparing to others.
+- At parameter setting: density = 0.9, range = (-0.1, 0.1), tc has the highest test accuracy than all other 3 models.
 
 ## Setting 5: number of pairs of predictors that have covariance
 
@@ -93,49 +122,65 @@ Here we consider changing sigma. We allow the variance of each dimension not to 
 
 We try alpha = [0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-outputs: in outputs/setting_5/ folder
+outputs:
+- in outputs/setting_5/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 csv files that record the model coefficients of 4 models in each parameter setting
+- 4 plots that describes the trends of training and testing accuracy data with respect to each alpha value
+- sigma_alpha=a_ith-example.csv record the sigma matrix generated in every 20th dataset with alpha = a.
+
+Observation:
+- At low sparsity setting, where there are more pairs of dimension that has correlations with each other, tc has higher test accuracy than lasso, but lower than svm and dlda.
+- As sparsity increases, dimensions are more independent, all 4 models' test accuracy show increasing trends.
 
 ## Setting 6: magnitude of covariance
 
 Similar to setting 4, but we change the range of smalles_coef and largest_coef in the make_sparse_spd_matrix()
 function. So this change the range of possible covariance. We fix alpha = 0.5. And try different (smalles_coef, largest_coef) tuple. [(-1, 1), (-5, 1), (-1, 5), (-10, 10), (-1, 10), (-1, 20)]
 
-outputs: in outputs/setting_6/ folder
+outputs:
+- in outputs/setting_6/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 csv files that record the model coefficients of 4 models in each parameter setting
+- range=(a,b)_ith-example.csv record the sigma matrix generated in every 20th dataset with range = (a,b) as described above.
+
+Observation:
+- **The test accuracy of tc is the highest among 4 models for all parameter tuple except (-1, 1).**
 
 ## Setting 7: Combine setting 5 and setting 6
 
 We try exhaustive combinations between alpha and (smalles_coef, largest_coef) tuple. We try alpha in [0.1, 0.9] and (smalles_coef, largest_coef) in [(-1, 1), (-10, 10), (-1, 20), (-5, 1)]
 
-outputs: in outputs/setting_7/ folder
+outputs:
+- in outputs/setting_7/ folder
+- accuracy_comparison.csv that compares accuracies of four models in each parameter setting
+- 4 csv files that record the model coefficients of 4 models in each parameter setting
+- generated_sigma_combination=j_ith-example.csv record the sigma matrix generated in every 20th dataset with jth combination of parameters as described above.
 
-## Setting 8: Imbalanced class
-
-Fix all other settings, but change prob = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
-
-outputs: in outputs/setting_8/ folder
+Observation:
+- **At tuple (-10, 10) and (-1, 20), tc has the highest test accuracy among the 4 models.**
 
 ## Implementation:
 
-8 python files to testing four models: setting_*.py
+7 python files to testing four models: setting_*.py
 
-helpers: generate_data.py -> used to generate X, y data
+helper modules: 
 
-         models.py -> interface for training and validating four models
+generate_data.py -> used to generate X, y data
 
-         utils.py -> provide a way to preprocess matrix in files
+models.py -> interface for training and validating four models
 
-         derive_coefs -> find recorded X,y,sigma,beta data for deriving optimal(Bayes) Classifier, learn an optimal linear model
+utils.py -> provide a way to preprocess matrix in files
 
-         compare_coefs -> used to compare optimal linear model with other 4 models to find the one with the best consistency/performance
+derive_coefs -> find recorded X,y,sigma,beta data for deriving optimal(Bayes) Classifier, learn an optimal linear model
 
-# Analysis and results:
+compare_coefs -> used to compare optimal linear model with other 4 models to find the one with the best consistency/performance
 
-Tournament Classifier:
+# To find the optimal classifier(Bayes Classifier):
 
-Seems to have higher test accuracy than SVM and DLDA in setting 7, with parameters alpha = 0.9, a = -5, b = 1 / alpha = 0.9, a = -1, b = 20
+In derive_coefs.py, we first compute P(x|y=1) and P(x|y=-1) for each example x, assuming the prior probability P(y=1)=prob, where prob is the probability we used to generate dataset. (In basic setting P(y=1)=0.5). Then we apply bayes rule to compute P(y=1|x). After this, we now obtain an n*1 vector Y' where each ith entry represent the probability of ith example to be class 1. Then we fitted a linear model, where a coefficient vector v is the least-square solution of Xv = Y. This v is the optimal coefficient we obtained.
 
-Works well as SVM and DLDA in setting 8, where class labels are unbalanced.
+Then we used this coefficient to compare with the coefficients of other models.
 
-Lasso:
+To be continued.
 
-Didn't converge in all parameter settings in setting 7

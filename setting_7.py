@@ -94,7 +94,7 @@ def main():
         for j in range(0, N):
             sigma = make_sparse_spd_matrix(p, alpha=comb['alpha'], smallest_coef=comb['a'], largest_coef=comb['b'], norm_diag=False)
             if (j+1) % 20 == 0:
-                with open (OUTPUT_DIR+'generated_simga_combination={}_{}th-example.csv'.format(i+1, j+1),'w') as file:
+                with open (OUTPUT_DIR+'generated_sigma_combination={}_{}th-example.csv'.format(i+1, j+1),'w') as file:
                     file.write(','.join(map(str, beta)))
             X, y = generate_data(n, PARAMS['prob'], mu, sigma, beta)
             all_X.append(X)

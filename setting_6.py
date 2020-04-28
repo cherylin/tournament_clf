@@ -95,7 +95,7 @@ def main():
         train_acc, test_acc = evaluation(all_ranges, X_in_all_ranges, y_in_all_ranges, N, p, n, model=m)
         result[m] = (train_acc, test_acc)
     with open(OUTPUT_DIR+'accuracy_comparison.csv', 'w') as fout:
-        fout.write(','.join(['smallest_coef','largest_coef','lasso-test','dlda-train','dlda-test','svm-train','svm-test','tc-train','tc-test']))
+        fout.write(','.join(['smallest_coef','largest_coef', 'lasso-train','lasso-test','dlda-train','dlda-test','svm-train','svm-test','tc-train','tc-test']))
         fout.write('\n') 
         for i, r in enumerate(all_ranges):
             output_list = [

@@ -6,16 +6,17 @@ from scipy.sparse.linalg import lsqr
 import utils
 
 INPUT_DIR = './setting_1/'
+PROB = 0.5
 
 def prob_y_given_x(X, y, sigma, beta):
-    # Assume p(y=1) and p(y=-1) are 1/2
     prob_1_given_x = []
     prob_2_given_x = []
     for x in X:
-        res1 = multivariate_normal.pdf(x, mean=beta[0], cov=sigma)
-        res2 = multivariate_normal.pdf(x, mean=-beta[0], cov=sigma)
-        prob_1_given_x.append(res1/(res1+res2))
-        prob_2_given_x.append(res2/(res1+res2))
+        prob_x_given_1 = multivariate_normal.pdf(x, mean=beta[0], cov=sigma)
+        prob_x_given_2 = multivariate_normal.pdf(x, mean=-beta[0], cov=sigma)
+        denominator = prob_x_given_1*PROB + prob_x_given_2*(1-PROB)
+        prob_1_given_x.append(prob_x_given_1*PROB / denominator)
+        prob_2_given_x.append(prob_x_given_2*(1-PROB) / denominator)
     return np.array(prob_1_given_x), np.array(prob_2_given_x)
 
 def main():
