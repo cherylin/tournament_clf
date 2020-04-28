@@ -182,5 +182,13 @@ In derive_coefs.py, we first compute P(x|y=1) and P(x|y=-1) for each example x, 
 
 Then we used this coefficient to compare with the coefficients of other models.
 
+Note: 
+- X|Y=1 ~ Multivariate Normal(beta, sigma)
+- X|Y=1 ~ Multivariate Normal(-beta, sigma)
+- So P(x|y=1) is just the pdf in corresponding generative model.
+
+- Bayesian rule: 
+- $$P(y=1|x) = \frac{P(x|y=1)P(y=1)}{P(x|y=1)*P(y=1)+P(x|y=-1)*P(y=-1)}$$
+
 To be continued.
 
